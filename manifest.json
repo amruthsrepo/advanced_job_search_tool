@@ -1,0 +1,15 @@
+{
+  "name": "Last 10 Visited Pages",
+  "version": "1.0",
+  "manifest_version": 3,
+  "description": "This extension saves the last 10 times you visited a page in cache and displays it next time you come back.",
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["contentscript.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
