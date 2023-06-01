@@ -26,7 +26,7 @@ Please note that the extension keeps track of the last 10 visited pages. If the 
 
 ## Contributing
 
-Contributions to this Chrome extension are welcome! If you encounter any issues, have suggestions for improvements, or would like to add new features, please feel free to open an issue or submit a pull request on the [GitHub repository](https://github.com/your-username/last-visited-chrome-extension).
+Contributions to this Chrome extension are welcome! If you encounter any issues, have suggestions for improvements, or would like to add new features, please feel free to open an issue or submit a pull request on the [GitHub repository](https://github.com/amruthsrepo/last_visited_chrome_extension).
 
 When contributing, please follow the existing code style and structure. Also, make sure to test your changes thoroughly before submitting them.
 
