@@ -1,42 +1,40 @@
 // Updates the last visited history and displays it in the extension badge and UI.
 function updateLastVisited() {
-  if (chrome.tabs) {
-    // Query the active tab
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      var activeTab = tabs[0];
-      const currentUrl = activeTab.url;
-      var today = new Date();
+  // Query the active tab
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    var activeTab = tabs[0];
+    const currentUrl = activeTab.url;
+    var today = new Date();
 
-      // Get the last visits for the current URL
-      chrome.history.getVisits({ url: currentUrl }).then(async (lastVisits) => {
-        // Convert visitTime to Date objects
-        lastVisits = lastVisits.map((v) => new Date(v.visitTime));
+    // Get the last visits for the current URL
+    chrome.history.getVisits({ url: currentUrl }).then(async (lastVisits) => {
+      // Convert visitTime to Date objects
+      lastVisits = lastVisits.map((v) => new Date(v.visitTime));
 
-        // Get the latest times from the array of dates
-        lastVisits = await getLatestTimes(lastVisits);
+      // Get the latest times from the array of dates
+      lastVisits = await getLatestTimes(lastVisits);
 
-        if (lastVisits.length === 1) {
-          // Set badge text to "NV" if there is only one visit
-          chrome.action.setBadgeText({ text: "NV" });
-        } else {
-          // Set badge text based on the time difference between the two latest visits
-          chrome.action.setBadgeText({
-            text: getLastVisitText(today, ...lastVisits.slice(0, 2)),
-          });
-        }
-
-        const ul = document.getElementById("lastVisits");
-
-        // Display each visit in the UI
-        lastVisits.forEach((lv) => {
-          const timeDiff = getTimeDifference(lv, today);
-          const li = document.createElement("li");
-          li.textContent = `${timeDiff} ago, ${lv.toLocaleString()}`;
-          ul.appendChild(li);
+      if (lastVisits.length < 2) {
+        // Set badge text to "NV" if there is only one visit
+        chrome.action.setBadgeText({ text: "NV" });
+      } else {
+        // Set badge text based on the time difference between the two latest visits
+        chrome.action.setBadgeText({
+          text: getLastVisitText(today, ...lastVisits.slice(0, 2)),
         });
+      }
+
+      const ul = document.getElementById("lastVisits");
+
+      // Display each visit in the UI
+      lastVisits.forEach((lv) => {
+        const timeDiff = getTimeDifference(lv, today);
+        const li = document.createElement("li");
+        li.textContent = `${timeDiff} ago, ${lv.toLocaleString()}`;
+        ul.appendChild(li);
       });
     });
-  }
+  });
 }
 
 // Calculates the time difference between two dates in days, months, or years
@@ -82,17 +80,18 @@ async function getLatestTimes(dates) {
   return result;
 }
 
-window.addEventListener("load", updateLastVisited);
-
-// Register the event listener
-chrome.tabs.onActivated.addListener(function (activeInfo) {
-  updateLastVisited();
-});
-
-// Add event listener for tab updates
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-  // Check if the URL has changed
-  if (changeInfo.url) {
+if (chrome.tabs) {
+  window.addEventListener("load", updateLastVisited);
+  // Register the event listener
+  chrome.tabs.onActivated.addListener(function (activeInfo) {
     updateLastVisited();
-  }
-});
+  });
+
+  // Add event listener for tab updates
+  chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+    // Check if the URL has changed
+    if (changeInfo.url) {
+      updateLastVisited();
+    }
+  });
+}
