@@ -10,7 +10,8 @@
     }
   ],
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": "history_icon.png"
   },
   "permissions": ["tabs", "history"]
 }
