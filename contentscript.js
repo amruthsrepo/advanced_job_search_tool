@@ -1,63 +1,72 @@
 // Save the current page to local storage.
 function updateLastVisited() {
-  const currentUrl = window.location.href;
-  const lastVisitedTimes =
-    JSON.parse(localStorage.getItem("lastVisitedTimes" + currentUrl)) || [];
+  if (chrome.tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      // since only one tab should be active and in the current window at once
+      // the return variable should only have one entry
+      var activeTab = tabs[0];
+      const currentUrl = activeTab.url;
+      console.log(currentUrl);
 
-  const today = new Date();
-  const todayJson = {
-    d: today.getDate(),
-    m: today.getMonth(),
-    y: today.getFullYear(),
-  };
+      const lastVisitedTimes =
+        JSON.parse(localStorage.getItem("lastVisitedTimes" + currentUrl)) || [];
 
-  // If there are no last 10 visited pages, then create a new array.
-  if (lastVisitedTimes.length === 0) {
-    chrome.action.setBadgeText({ text: "NV" });
-  } else {
-    const lastVisitJson = lastVisitedTimes[0][1];
-    const lastVisitJson2 =
-      lastVisitedTimes.length > 1
-        ? lastVisitedTimes[1][1]
-        : lastVisitedTimes[0][1];
-    const st = getLastVisitText(todayJson, lastVisitJson, lastVisitJson2);
-    chrome.action.setBadgeText({ text: st });
-    if (getTimeDifference(todayJson, lastVisitJson) == "NT") {
-      lastVisitedTimes.splice(0, 1);
-    }
+      const today = new Date();
+      const todayJson = {
+        d: today.getDate(),
+        m: today.getMonth(),
+        y: today.getFullYear(),
+      };
+
+      // If there are no last 10 visited pages, then create a new array.
+      if (lastVisitedTimes.length === 0) {
+        chrome.action.setBadgeText({ text: "NV" });
+      } else {
+        const lastVisitJson = lastVisitedTimes[0][1];
+        const lastVisitJson2 =
+          lastVisitedTimes.length > 1
+            ? lastVisitedTimes[1][1]
+            : lastVisitedTimes[0][1];
+        const st = getLastVisitText(todayJson, lastVisitJson, lastVisitJson2);
+        chrome.action.setBadgeText({ text: st });
+        if (getTimeDifference(todayJson, lastVisitJson) == "NT") {
+          lastVisitedTimes.splice(0, 1);
+        }
+      }
+
+      // Remove the oldest page from the last 10 visited pages array if it is more than 10 items long.
+      if (lastVisitedTimes.length >= 10) {
+        lastVisitedTimes.pop();
+      }
+
+      const formattedDate = today.toLocaleString("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+      // Add the current page to the last 10 visited pages array.
+      lastVisitedTimes.unshift([formattedDate, todayJson]);
+
+      // Create a new div element for each visited page.
+      const ul = document.getElementById("lastVisits");
+      ul.innerHTML = ""; // Clear the previous list
+      for (let i = 0; i < lastVisitedTimes.length; i++) {
+        const timeDiff = getTimeDifference(todayJson, lastVisitedTimes[i][1]);
+        const li = document.createElement("li");
+        li.textContent = `${timeDiff} ago, ${lastVisitedTimes[i][0]}`;
+        ul.appendChild(li);
+      }
+
+      // Save the last 10 visited pages to local storage.
+      localStorage.setItem(
+        "lastVisitedTimes" + currentUrl,
+        JSON.stringify(lastVisitedTimes)
+      );
+    });
   }
-
-  // Remove the oldest page from the last 10 visited pages array if it is more than 10 items long.
-  if (lastVisitedTimes.length >= 10) {
-    lastVisitedTimes.pop();
-  }
-
-  const formattedDate = today.toLocaleString("en-US", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-
-  // Add the current page to the last 10 visited pages array.
-  lastVisitedTimes.unshift([formattedDate, todayJson]);
-
-  // Create a new div element for each visited page.
-  const ul = document.getElementById("lastVisits");
-  ul.innerHTML = ""; // Clear the previous list
-  for (let i = 0; i < lastVisitedTimes.length; i++) {
-    const timeDiff = getTimeDifference(todayJson, lastVisitedTimes[i][1]);
-    const li = document.createElement("li");
-    li.textContent = `${timeDiff} ago, ${lastVisitedTimes[i][0]}`;
-    ul.appendChild(li);
-  }
-
-  // Save the last 10 visited pages to local storage.
-  localStorage.setItem(
-    "lastVisitedTimes" + currentUrl,
-    JSON.stringify(lastVisitedTimes)
-  );
 }
 
 // Calculate the time difference between two dates.
