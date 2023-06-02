@@ -40,4 +40,4 @@ This extension was developed by [Amruth Nag](https://github.com/amruthsrepo).
 
 ## Disclaimer
 
-This Chrome extension works based on the browser's history and local storage. It may not accurately reflect the last time you visited a page if your browser history is cleared or if you visit the same page on different devices. The extension should be used as a reference and not as an absolute measure of the last visit time.
+This Chrome extension works based on the browser's history. It may not accurately reflect the last time you visited a page if your browser history is cleared or if you visit the same page on different devices. The extension should be used as a reference and not as an absolute measure of the last visit time.
