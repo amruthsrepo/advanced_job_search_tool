@@ -83,3 +83,16 @@ async function getLatestTimes(dates) {
 }
 
 window.addEventListener("load", updateLastVisited);
+
+// Register the event listener
+chrome.tabs.onActivated.addListener(function (activeInfo) {
+  updateLastVisited();
+});
+
+// Add event listener for tab updates
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  // Check if the URL has changed
+  if (changeInfo.url) {
+    updateLastVisited();
+  }
+});
