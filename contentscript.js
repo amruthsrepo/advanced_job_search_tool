@@ -5,14 +5,19 @@ function updateLastVisited() {
     var activeTab = tabs[0];
     const currentUrl = activeTab.url;
     var today = new Date();
+    var latestBeforeToday;
 
     // Get the last visits for the current URL
     chrome.history.getVisits({ url: currentUrl }).then(async (lastVisits) => {
+      var lastVisitsResult;
+
       // Convert visitTime to Date objects
       lastVisits = lastVisits.map((v) => new Date(v.visitTime));
 
       // Get the latest times from the array of dates
-      lastVisits = await getLatestTimes(lastVisits);
+      lastVisitsResult = await getLatestTimes(lastVisits, today);
+      lastVisits = lastVisitsResult.lastVisits;
+      latestBeforeToday = lastVisitsResult.latestBeforeToday;
 
       if (lastVisits.length < 2) {
         // Set badge text to "NV" if there is only one visit
@@ -20,7 +25,11 @@ function updateLastVisited() {
       } else {
         // Set badge text based on the time difference between the two latest visits
         chrome.action.setBadgeText({
-          text: getLastVisitText(today, ...lastVisits.slice(0, 2)),
+          text: getLastVisitText(
+            today,
+            ...lastVisits.slice(0, 1),
+            latestBeforeToday
+          ),
         });
       }
 
@@ -30,7 +39,9 @@ function updateLastVisited() {
       lastVisits.forEach((lv) => {
         const timeDiff = getTimeDifference(lv, today);
         const li = document.createElement("li");
-        li.textContent = `${timeDiff} ago, ${lv.toLocaleString()}`;
+        li.textContent = `${
+          timeDiff === "Today" ? timeDiff : `${timeDiff} ago`
+        }, ${lv.toLocaleString()}`;
         ul.appendChild(li);
       });
     });
@@ -45,17 +56,20 @@ function getTimeDifference(startDate, endDate) {
   const diff = endTime - startTime;
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const months = Math.floor(diff / (1000 * 60 * 60 * 24 * 30));
-  const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
+  const months = days > 30 ? endDate.getMonth() - startDate.getMonth() : 0;
+  const years =
+    Math.floor(diff / (1000 * 60 * 60 * 24 * 12)) > 12
+      ? endDate.getFullYear() - startDate.getFullYear()
+      : 0;
 
-  if (days > 0) {
-    return `${days}D`;
+  if (years > 0) {
+    return `${years}Y`;
   } else if (months > 0) {
     return `${months}M`;
-  } else if (years > 0) {
-    return `${years}Y`;
+  } else if (days > 0) {
+    return `${days}D`;
   } else {
-    return "NT"; // "NT" stands for "No Time"
+    return "Today";
   }
 }
 
@@ -63,21 +77,34 @@ function getTimeDifference(startDate, endDate) {
 function getLastVisitText(today, lastVisit, lastVisit2) {
   const timeDiff = getTimeDifference(lastVisit, today);
   const timeDiff2 = getTimeDifference(lastVisit2, today);
-  return timeDiff !== "NT" ? timeDiff : timeDiff2;
+  return timeDiff !== "Today" ? timeDiff : timeDiff2;
 }
 
 // Retrieves the latest times from an array of dates
-async function getLatestTimes(dates) {
+async function getLatestTimes(dates, today) {
   const latestTimes = {};
+  const todayTimes = [];
+  const todayKey = today.toDateString();
+  var latestBeforeToday;
 
   for (const date of dates) {
     const dateKey = date.toDateString();
-    latestTimes[dateKey] = date;
+    if (dateKey === todayKey) {
+      todayTimes.push(date);
+    } else {
+      latestBeforeToday = date;
+      latestTimes[dateKey] = date;
+    }
   }
 
-  const result = Object.values(latestTimes).sort((a, b) => b - a);
+  const result = [...todayTimes, ...Object.values(latestTimes)].sort(
+    (a, b) => b - a
+  );
 
-  return result;
+  return {
+    lastVisits: result,
+    latestBeforeToday: latestBeforeToday || today,
+  };
 }
 
 if (chrome.tabs) {
