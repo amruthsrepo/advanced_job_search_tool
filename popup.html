@@ -1,9 +1,96 @@
 <html>
   <head>
     <title>Last 5 Visited Pages</title>
+    <script src="contentscript.js"></script>
+    <style>
+      .tableFixHead {
+        overflow-y: auto;
+        max-height: 27ex;
+        margin-bottom: 5%;
+      }
+      .tableFixHead thead th {
+        position: sticky;
+        top: 0px;
+      }
+      .tableFixHead tbody {
+        overflow-y: auto;
+        max-height: 15ex;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        /* padding: 4px 8px; */
+        border: 1px solid #ccc;
+      }
+      th {
+        background: #eee;
+      }
+    </style>
   </head>
-  <body style="width: 20em">
-    <ul style="width: 20em" id="lastVisits"></ul>
+  <body style="width: 30em">
+    <div
+      style="width: 95%; padding-inline-start: 1em; display: none"
+      id="lastVisits"
+      class="tableFixHead"
+    ></div>
+    <div
+      style="width: 95%; padding-inline-start: 1em; display: none"
+      id="urlsToVisit"
+      class="tableFixHead"
+    ></div>
+    <div
+      style="width: 95%; padding-inline-start: 1em; display: none"
+      id="addURLdiv"
+    >
+      <table
+        style="
+          border: 1px solid black;
+          border-radius: 5px;
+          border-collapse: separate;
+          width: 21em;
+        "
+      >
+        <thead>
+          <th colspan="2">Add current page to visit later</th>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="2">
+              <textarea
+                name="urlInput"
+                id="urlInput"
+                rows="5"
+                style="width: 100%; resize: vertical"
+              ></textarea>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <input style="width: 100%" id="urlTitleInput" type="text" />
+            </td>
+            <td>
+              <input
+                style="
+                  width: 100%;
+                  background: white;
+                  border: 1px solid;
+                  border-radius: 4px;
+                  height: 1.6em;
+                  cursor: pointer;
+                "
+                type="button"
+                value="Add"
+                id="addURLButton"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="display: none" id="urlExists">URL is already tracked!</p>
+      <p style="display: none" id="urlAdded">URL is added!</p>
+    </div>
   </body>
-  <script src="contentscript.js"></script>
 </html>
