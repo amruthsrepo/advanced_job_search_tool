@@ -31,21 +31,22 @@ async function updateLastVisits(currentUrl, currentTitle) {
   const beforeTodayVisit = lastVisitsResult.beforeTodayVisit;
 
   // Set badge text based on the number of visits and latest visit time
-  if (lastVisits.length === 0) {
-    // Set badge text to "NV" if there is no visit
-    chrome.action.setBadgeText({ text: "NV" });
-  } else if (beforeTodayVisit === undefined) {
-    // Set badge text to "NT" if there is no visit before today
-    chrome.action.setBadgeText({ text: "NT" });
-  } else {
-    // Calculate the time difference between the latest visit and today
-    beforeTodayVisitDiff = getTimeDifference(beforeTodayVisit, today);
-    // Set badge text based on the time difference
-    chrome.action.setBadgeText({ text: beforeTodayVisitDiff });
-  }
+  // if (lastVisits.length === 0) {
+  //   // Set badge text to "NV" if there is no visit
+  //   chrome.action.setBadgeText({ text: "NV" });
+  // } else if (beforeTodayVisit === undefined) {
+  //   // Set badge text to "NT" if there is no visit before today
+  //   chrome.action.setBadgeText({ text: "NT" });
+  // } else {
+  //   // Calculate the time difference between the latest visit and today
+  //   beforeTodayVisitDiff = getTimeDifference(beforeTodayVisit, today);
+  //   // Set badge text based on the time difference
+  //   chrome.action.setBadgeText({ text: beforeTodayVisitDiff });
+  // }
 
   // Display the last visit information in a table
   if (todayVisit !== undefined || beforeTodayVisit !== undefined) {
+    beforeTodayVisitDiff = getTimeDifference(beforeTodayVisit, today);
     const ul = document.getElementById("lastVisits");
     ul.textContent = "";
     const currentUrlVisitData = {
@@ -128,6 +129,8 @@ function displayTrackedURLs(currentUrl, currentTitle, trackedURLs) {
 
     ul.appendChild(createTable(dataForTable));
     ul.style.removeProperty("display");
+  } else {
+    displaySaveUrlOption(currentUrl, currentTitle);
   }
 }
 
