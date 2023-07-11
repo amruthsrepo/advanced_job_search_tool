@@ -1,4 +1,4 @@
-# Last Visited Chrome Extension
+# Advanced Job Search Chrome Extension
 
 This Google Chrome extension shows the last time you visited a particular page based on your browser history. It keeps track of the last 10 visited pages and displays the time difference between the current visit and the previous visits.
 
